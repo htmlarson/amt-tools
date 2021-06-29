@@ -9,7 +9,7 @@ These are a current list of the tools, and what they do:
 * **filter_by_availability.js** will do just that -- remove all the non-green locations off of the list, with the bonus of adding city/state information to the list. The city/state information will be added as you use the tool, or you can quickly learn the locations using the following tool:
     * Using **quick_learn_locations.js** you can open a `Location Search` under Tools in AMT, and quickly import city/state information for use in the above tool
 
-* **open_pendings.js** is probably the most simple -- this tool coninually looks for a new contract number to be available, and when found, will open the ESL to contextualize the availability. This is great for pending agreements.
+* **open_pendings.js** is probably the most simple -- this tool continually looks for a new contract number to be available, and when found, will open the ESL to contextualize the availability. This is great for pending agreements.
 
 ## How do I use these? 
 
