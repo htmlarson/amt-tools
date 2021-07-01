@@ -13,7 +13,6 @@ Q: Do I have to do this every time I want to search for a location?
 A: Yes. 
 
 */
-
 sessionStorage.mode = 1;
 if (document.querySelector("#recentMode")) {
     sessionStorage.mode = parseInt(document.querySelector("#recentMode").value) + 1;
@@ -23,15 +22,19 @@ function searchList() {
     var locList = document.querySelector("#EntityDropDown").options;
     var i = 0;
     while (i < locList.length) {
-        if (locList[i].className !== "green") {
+        if (!locList[i].classList.contains("green")) {
             locList.remove(i);
+            continue;
         } else {
             console.log(locList.value);
-            locList[i].innerText += typeof localStorage.getItem(locList[i].value) !== 'undefined' && localStorage.getItem(locList[i].value) !== null ? " " + localStorage.getItem(locList[i].value) : "";
+            if (!locList[i].classList.contains("cityState")) {
+                locList[i].innerText += typeof localStorage.getItem(locList[i].value) !== 'undefined' && localStorage.getItem(locList[i].value) !== null ? ": " + localStorage.getItem(locList[i].value) : ": (not found)";
+                locList[i].classList.add("cityState");
+            }
             i++;
         }
     }
-    if (locList.length < sessionStorage.mode) {
+    if (locList.length < parseInt(sessionStorage.mode)) {
         refineSearchArea();
     } else {
         handleList(locList);
@@ -42,8 +45,7 @@ function handleList(locList) {
     sessionStorage.counter = 0;
     try {
         sessionStorage.beforeAlink = document.querySelector("#RSScheduleLog").getAttribute('onclick');
-    }
-    catch (e) {
+    } catch (e) {
         window.alert("Error getting scheduling link");
         return false;
     }
@@ -61,7 +63,8 @@ function handleList(locList) {
                 document.querySelector("#RSScheduleLog").click();
                 var addressDetail = document.querySelector("#mapLocationDetails > div.row > div:nth-child(2) > dl > dd.nowrap").innerHTML.split("<br>");
                 localStorage.setItem(document.querySelector("#EntityDropDown").value, addressDetail[addressDetail.length - 1].trim());
-                }, 100);
+            }
+            , 100);
             clearInterval(repeatable);
         } else {
             sessionStorage.counter++;
@@ -78,8 +81,9 @@ function handleList(locList) {
 function refineSearchArea() {
     if (parseInt(document.querySelector("#userInputRadius").value) === 300) {
         window.alert("None found.");
-        document.querySelector("#userInputRadius").options.selectedIndex = 8;
-        UpdateMapAllEntityLocation('fromSelectList');
+        document.querySelector("#userInputRadius").options.selectedIndex = 9;
+        document.querySelector("#userInputRadius_chosen > a > span").innerText = document.querySelector("#userInputRadius").value;
+        MultipleMapRadiusChanged();
         return false;
     }
 
@@ -89,7 +93,7 @@ function refineSearchArea() {
             document.querySelector("#userInputRadius").options.selectedIndex = document.querySelector("#userInputRadius").options.selectedIndex > 8 ? 3 : document.querySelector("#userInputRadius").options.selectedIndex + 1;
             document.querySelector("#userInputRadius_chosen > a > span").innerText = document.querySelector("#userInputRadius").value;
             MultipleMapRadiusChanged();
-            
+
             var beforeNext = setInterval(()=>{
                 sessionStorage.counter++;
                 if (document.querySelectorAll("#loadingDiv")[0].style.display == "none") {
@@ -114,6 +118,12 @@ function setRecentMode() {
     }
 
     document.querySelector("#recentMode").value = sessionStorage.mode;
+    document.querySelector("#truckModelSearchDropDown").addEventListener('change', ()=>{
+        document.querySelector("#recentMode").value = 0;
+    });
+    document.querySelector("#trailerTowModelSearchDropDown").addEventListener('change', ()=>{
+        document.querySelector("#recentMode").value = 0;
+    });
 }
 function frostSelector() {
     document.querySelector("#EntityDropDown").disabled = "disabled";
