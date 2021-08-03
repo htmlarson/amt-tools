@@ -13,7 +13,6 @@ Q: Do I have to do this every time I want to search for a location?
 A: Yes. 
 
 */
-
 sessionStorage.mode = 1;
 if (document.querySelector("#recentMode")) {
     sessionStorage.mode = parseInt(document.querySelector("#recentMode").value) + 1;
