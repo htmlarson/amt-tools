@@ -1,7 +1,4 @@
-// WHAT DOES THIS DO?
-// For pending agreements, this snippet will monitor for a newly opened contract and open open the associated ESL. You can run it on a Windows computer by pressing CTRL + Enter.
-
-// NOTE: You only have to initiate this *once*. It will continue to run.
+// This is a "service" that can be run in the background. This is useful for running pending agreements. It will open the scheduling log so that you can have more context when scheduling reservations. 
 
 function autoOpenESL(intv) {
     if (sessionStorage.stop == true) {
@@ -24,5 +21,18 @@ function autoOpenESL(intv) {
         }
     }
 }
+
+/* function interpretITOW() {
+    if (document.querySelectorAll("#notesTextBox").length > 0) {
+
+        try {
+            if (document.querySelector("#notesTextBox").value.substr(0,2) == "IT" && 
+                document.querySelector("#reservationEquipmentList").children[0].children[5].children[0].click();
+        }
+        catch (e) {
+
+        }
+    }
+} */
 sessionStorage.resNumber = 0;
-var intv = setInterval((intv)=>{autoOpenESL()}, 1000);
+var intv = setInterval((intv)=>{autoOpenESL()}, 100);

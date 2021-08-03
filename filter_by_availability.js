@@ -23,15 +23,24 @@ function searchList() {
     var locList = document.querySelector("#EntityDropDown").options;
     var i = 0;
     while (i < locList.length) {
-        if (locList[i].className !== "green") {
+        if (!locList[i].classList.contains("green")) {
             locList.remove(i);
-        } else {
+            continue;
+        } else { 
             console.log(locList.value);
-            locList[i].innerText += typeof localStorage.getItem(locList[i].value) !== 'undefined' && localStorage.getItem(locList[i].value) !== null ? " " + localStorage.getItem(locList[i].value) : "";
+            if (!locList[i].classList.contains("cityState")) {
+                if (parseInt(localStorage.getItem(locList[i].value + "MCO")) !== parseInt(document.querySelector("#mcoTitle").innerText.substr(4, 3))) {
+                    locList[i].classList.add("outMCO");
+                    locList[i].innerText = "^" + locList[i].innerText;
+                }
+                
+                locList[i].innerText += typeof localStorage.getItem(locList[i].value) !== 'undefined' && localStorage.getItem(locList[i].value) !== null ? ": " + localStorage.getItem(locList[i].value) : "?";
+                locList[i].classList.add("cityState");
+            }
             i++;
         }
     }
-    if (locList.length < sessionStorage.mode) {
+    if (locList.length < parseInt(sessionStorage.mode)) {
         refineSearchArea();
     } else {
         handleList(locList);
@@ -40,15 +49,21 @@ function searchList() {
 
 function handleList(locList) {
     sessionStorage.counter = 0;
+
     try {
         sessionStorage.beforeAlink = document.querySelector("#RSScheduleLog").getAttribute('onclick');
-    }
-    catch (e) {
+    } catch (e) {
         window.alert("Error getting scheduling link");
+        try {
+            document.querySelector("#recentMode").value = 0;
+        } catch (e) {
+            console.log("Script not able to reset recentMode.");
+        }
         return false;
     }
     locList.selectedIndex = sessionStorage.mode - 1;
     UpdateMapAllEntityLocation('fromSelectList');
+
     var repeatable = setInterval(()=>{
         try {
             var newALink = document.querySelector("#RSScheduleLog").getAttribute('onclick');
@@ -56,12 +71,23 @@ function handleList(locList) {
             console.log("Not ready");
             return false;
         }
+
         if (sessionStorage.beforeAlink !== newALink) {
             setTimeout(()=>{
+                if (locList[locList.selectedIndex].classList.contains("outMCO")) {
+                    /* if (!confirm(locList[locList.selectedIndex].value + " may not be within MCO. Continue?")) {
+                        sessionStorage.mode = parseInt(document.querySelector("#recentMode").value) + 1;
+                        searchList();
+                        return false;
+                    } */
+                }
                 document.querySelector("#RSScheduleLog").click();
+                document.querySelector("#lnkContractAddNote").click();
                 var addressDetail = document.querySelector("#mapLocationDetails > div.row > div:nth-child(2) > dl > dd.nowrap").innerHTML.split("<br>");
                 localStorage.setItem(document.querySelector("#EntityDropDown").value, addressDetail[addressDetail.length - 1].trim());
-                }, 100);
+
+            }
+            , 100);
             clearInterval(repeatable);
         } else {
             sessionStorage.counter++;
@@ -72,14 +98,14 @@ function handleList(locList) {
         }
     }
     , 1000);
-
 }
 
 function refineSearchArea() {
     if (parseInt(document.querySelector("#userInputRadius").value) === 300) {
         window.alert("None found.");
-        document.querySelector("#userInputRadius").options.selectedIndex = 8;
-        UpdateMapAllEntityLocation('fromSelectList');
+        document.querySelector("#userInputRadius").options.selectedIndex = 9;
+        document.querySelector("#userInputRadius_chosen > a > span").innerText = document.querySelector("#userInputRadius").value;
+        MultipleMapRadiusChanged();
         return false;
     }
 
@@ -89,7 +115,7 @@ function refineSearchArea() {
             document.querySelector("#userInputRadius").options.selectedIndex = document.querySelector("#userInputRadius").options.selectedIndex > 8 ? 3 : document.querySelector("#userInputRadius").options.selectedIndex + 1;
             document.querySelector("#userInputRadius_chosen > a > span").innerText = document.querySelector("#userInputRadius").value;
             MultipleMapRadiusChanged();
-            
+
             var beforeNext = setInterval(()=>{
                 sessionStorage.counter++;
                 if (document.querySelectorAll("#loadingDiv")[0].style.display == "none") {
@@ -114,10 +140,23 @@ function setRecentMode() {
     }
 
     document.querySelector("#recentMode").value = sessionStorage.mode;
+    document.querySelector("#truckModelSearchDropDown").addEventListener('change', ()=>{
+        document.querySelector("#recentMode").value = 0;
+    }
+    );
+    document.querySelector("#trailerTowModelSearchDropDown").addEventListener('change', ()=>{
+        document.querySelector("#recentMode").value = 0;
+    }
+    );
+    document.querySelector("#EntityDropDown").addEventListener('change', ()=>{
+        document.querySelector("#recentMode").value = document.querySelector("#EntityDropDown").selectedIndex + 1;
+    }
+    );
 }
 function frostSelector() {
     document.querySelector("#EntityDropDown").disabled = "disabled";
 }
+
 // frostSelector();
 searchList();
 setRecentMode();
